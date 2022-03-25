@@ -39,7 +39,8 @@ class BandsT:
         if U > h and l > L:
             return False
         else:
-            return L -l
+            t = L - l
+            return t * t / t
 
 
 class Symbols:

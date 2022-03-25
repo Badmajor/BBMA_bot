@@ -1,21 +1,26 @@
 import MetaTrader5 as mt5
 import pandas as pd
+import threading
 
 from data.config import LOGIN, SERVER, PASSWORD
+
+locker = threading.Lock()
 
 
 class Bands:
     def __init__(self, tf, symbol):
+        locker.acquire()
         self._status_ = mt5.initialize(login=LOGIN, server=SERVER, password=PASSWORD)
         self.tf = tf
         self.symbol = symbol
         self.bid = mt5.symbol_info(symbol).bid
         self.ask = mt5.symbol_info(symbol).ask
         self.rates20 = mt5.copy_rates_from_pos(symbol, tf, 1, 20)
-        self.rates10 = mt5.copy_rates_from_pos(symbol, tf, 1, 10)
-        self.rates5 = mt5.copy_rates_from_pos(symbol, tf, 1, 5)
+        self.rates10 = mt5.copy_rates_from_pos(symbol, tf, 0, 10)
+        self.rates5 = mt5.copy_rates_from_pos(symbol, tf, 0, 5)
         self.rates_now = mt5.copy_rates_from_pos(symbol, tf, 1, 1)
         mt5.shutdown()
+        locker.release()
         self.candle = pd.DataFrame(self.rates_now).mean()
         self.sma = pd. DataFrame(self.rates20).mean().close
         self.wma_low_10 = pd.DataFrame(self.rates10).mean().low
@@ -39,10 +44,10 @@ class Bands:
         o, c = self.candle.open, self.candle.close
         if max(o, c) > self.sma > min(o, c):
             return c - o
-        if U > h and l > L:
+        if U > c > L:
             return False
         else:
-            return l - L
+            return c - L
 
 
 class Symbols:
