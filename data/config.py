@@ -10,3 +10,6 @@ PASSWORD = os.environ['PASSWORD']
 SERVER = os.environ['SERVER']
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
+
+ADMIN = os.environ['ADMIN']
+SUBSCRIBERS = os.environ['SUBSCRIBERS']

@@ -47,11 +47,3 @@ class Bands:
             return False
         else:
             return c - L
-
-
-class Symbols:
-    def __init__(self):
-        self._status_ = mt5.initialize(login=68066228, server="RoboForex-Pro", password="Android19")
-        self.all = pd.DataFrame(mt5.symbols_get())
-        self.count = len(mt5.symbols_get())
-
