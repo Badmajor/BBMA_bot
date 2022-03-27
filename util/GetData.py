@@ -10,8 +10,8 @@ locker = threading.Lock()
 class Bands:
     def __init__(self, tf, symbol):
         locker.acquire()
-        self._status_ = mt5.initialize(login=LOGIN, server=SERVER, password=PASSWORD)
-        self.tf = tf
+        if not mt5.terminal_info():
+            self._status_ = mt5.initialize(login=LOGIN, server=SERVER, password=PASSWORD)
         self.symbol = symbol
         self.bid = mt5.symbol_info(symbol).bid
         self.ask = mt5.symbol_info(symbol).ask
@@ -19,7 +19,6 @@ class Bands:
         self.rates10 = mt5.copy_rates_from_pos(symbol, tf, 0, 10)
         self.rates5 = mt5.copy_rates_from_pos(symbol, tf, 0, 5)
         self.rates_now = mt5.copy_rates_from_pos(symbol, tf, 1, 1)
-        mt5.shutdown()
         locker.release()
         self.candle = pd.DataFrame(self.rates_now).mean()
         self.sma = pd. DataFrame(self.rates20).mean().close

@@ -1,7 +1,6 @@
 import threading
-import time
 
-from data.const import symbol_tuple, tf_tuple, tf_dict
+from data.const import symbol_tuple, tf_tuple
 from util.bot_functions import catch_signal
 
 threads = []
