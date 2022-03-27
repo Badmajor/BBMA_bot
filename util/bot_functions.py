@@ -1,7 +1,7 @@
 import threading
 import time
 
-from data.const import tf_dict
+from data.const import tf_dict, symbol_tuple, tf_tuple
 from util.GetData import Bands
 
 locker = threading.Lock()
@@ -90,3 +90,20 @@ def get_tf(tf):
         return f'{int(minutes) // 60} Ч'
     else:
         return f'{int(minutes)} Мин'
+
+
+def get_arg_list() -> list[tuple]:
+    arg_list = []
+    for s in symbol_tuple:
+        for t in tf_tuple:
+            arg_list.append((s, t))
+    return arg_list
+
+
+def watch_mt5():
+    threads = []
+    for i in get_arg_list():
+        t = threading.Thread(name=f'{i[0]} {str(get_tf(i[1]))}', target=catch_signal, args=(i, ))
+        threads.append(t)
+        t.start()
+    print(threads)

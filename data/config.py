@@ -8,3 +8,5 @@ env.read_env()
 LOGIN = int(os.environ['LOGIN'])
 PASSWORD = os.environ['PASSWORD']
 SERVER = os.environ['SERVER']
+
+BOT_TOKEN = os.environ['BOT_TOKEN']
