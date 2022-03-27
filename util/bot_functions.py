@@ -9,8 +9,8 @@ locker = threading.Lock()
 
 def catch_signal(ts: tuple):
     sym, tf = ts
-    tf_human = get_tf(tf)
     locker.acquire()
+    tf_human = get_tf(tf)
     print(sym, tf_human)
     locker.release()
     bands = Bands(tf, sym)
