@@ -1,26 +1,24 @@
+import asyncio
 import threading
 import time
 
+from data.config import ADMIN
 from data.const import tf_dict, symbol_tuple, tf_tuple
+from loader import bot
 from util.GetData import Bands
 
-locker = threading.Lock()
 
-
-def catch_signal(ts: tuple):
+async def catch_signal(ts: tuple):
     sym, tf = ts
-    locker.acquire()
     tf_human = get_tf(tf)
     print(sym, tf_human)
-    locker.release()
     bands = Bands(tf, sym)
     while True:
         trend = bands.check_csm_csak()
         if not trend:
-            time.sleep(tf_dict.get(tf))
+            await asyncio.sleep(tf_dict.get(tf))
             bands = Bands(tf, sym)
         else:
-            locker.acquire()
             print('↓' if 0 > trend else '↑', sym, tf_human)
             print('Upper:', bands.upper(), 'quote high:', bands.candle.high)
             print('Lower:', bands.lower(), 'quote low:', bands.candle.low)
@@ -30,11 +28,10 @@ def catch_signal(ts: tuple):
             print('поймал, тренд')
             print(time.asctime())
             print()
-            locker.release()
             flag = 0
             if trend > 0:
                 while bands.bid > max(bands.wma_low_10, bands.wma_low_5):
-                    time.sleep(1)
+                    await asyncio.sleep(1)
                     flag += 1
                     if flag == tf_dict.get(tf) * 8:
                         print(sym, tf)
@@ -42,7 +39,6 @@ def catch_signal(ts: tuple):
                         break
                     bands = Bands(tf, sym)
                 else:
-                    locker.acquire()
                     print(sym, tf_human)
                     print('Upper:', bands.upper(), 'quote high:', bands.candle.high)
                     print('Lower:', bands.lower(), 'quote low:', bands.candle.low)
@@ -51,19 +47,18 @@ def catch_signal(ts: tuple):
                     print('wma_low_max:', max(bands.wma_low_10, bands.wma_low_5))
                     print('поймал, re-entry')
                     print(time.asctime())
+                    await bot.send_message(chat_id=ADMIN, text=f'поймал re-entry ↑ {sym, tf_human}')
                     print()
-                    time.sleep(tf_dict.get(tf))
+                    await asyncio.sleep(tf_dict.get(tf))
                     bands = Bands(tf, sym)
-                    locker.release()
             else:
                 while bands.bid < min(bands.wma_high_5, bands.wma_high_10):
-                    time.sleep(1)
+                    await asyncio.sleep(1)
                     flag += 1
                     if flag == tf_dict.get(tf) * 8:
                         break
                     bands = Bands(tf, sym)
                 else:
-                    locker.acquire()
                     print(sym, tf_human)
                     print('Upper:', bands.upper(), 'quote high:', bands.candle.high)
                     print('Lower:', bands.lower(), 'quote low:', bands.candle.low)
@@ -72,10 +67,10 @@ def catch_signal(ts: tuple):
                     print('wma_high_min:', min(bands.wma_high_5, bands.wma_high_10))
                     print('поймал, re-entry')
                     print(time.asctime())
+                    await bot.send_message(chat_id=ADMIN, text=f'поймал re-entry ↓ {sym, tf_human}')
                     print()
-                    time.sleep(tf_dict.get(tf))
+                    await asyncio.sleep(tf_dict.get(tf))
                     bands = Bands(tf, sym)
-                    locker.release()
 
 
 def get_tf(tf):
@@ -94,10 +89,21 @@ def get_tf(tf):
 
 def get_arg_list() -> list[tuple]:
     arg_list = []
-    for s in symbol_tuple:
-        for t in tf_tuple:
+    for t in tf_tuple:
+        for s in symbol_tuple:
             arg_list.append((s, t))
     return arg_list
+
+
+
+"""def watch_mt5():
+    async_list = []
+    for i in get_arg_list():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        a = asyncio.get_event_loop().run_until_complete(catch_signal(i))
+        async_list.append(a)
+    print(async_list)"""
 
 
 def watch_mt5():
