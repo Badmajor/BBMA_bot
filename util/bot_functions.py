@@ -81,12 +81,12 @@ def catch_signal(ts: tuple):
 def get_tf(tf):
     minutes = tf_dict.get(tf) / 60
     if minutes >= 40320:
-        return f'{minutes // 40320} Мес'
+        return f'{int(minutes // 40320)} Мес'
     elif minutes >= 10080:
-        return f'{minutes // 10080} Н'
+        return f'{int(minutes // 10080)} Н'
     elif minutes >= 1440:
-        return f'{minutes // 1440} Д'
+        return f'{int(minutes) // 1440} Д'
     elif minutes >= 60:
-        return f'{minutes // 60} Ч'
+        return f'{int(minutes) // 60} Ч'
     else:
-        return f'{minutes} Мин'
+        return f'{int(minutes)} Мин'
