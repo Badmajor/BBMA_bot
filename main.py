@@ -1,16 +1,15 @@
 import asyncio
-import logging
-import tracemalloc
 
+from data.config import ADMIN
 from loader import dp, bot
+from util.bot_functions import catch_signal, get_arg_list
 
 
-import handlers
-
-logger = logging.getLogger(__name__)
+ADMIN_list = ADMIN.split(', ')
 
 
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    watch_mt5()
-    dp.run_polling(bot)
+cycle_list = [asyncio.ensure_future(catch_signal(i)) for i in get_arg_list()]
+
+event_loop = asyncio.get_event_loop()
+
+event_loop.run_until_complete(asyncio.gather(*cycle_list))
