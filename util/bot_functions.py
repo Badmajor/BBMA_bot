@@ -47,7 +47,7 @@ async def catch_signal(ts: tuple):
                     print('wma_low_max:', max(bands.wma_low_10, bands.wma_low_5))
                     print('поймал, re-entry')
                     print(time.asctime())
-                    await bot.send_message(chat_id=ADMIN, text=f'поймал re-entry ↑ {sym, tf_human}')
+                    await send_alert(text=f'поймал re-entry ↑ {sym, tf_human}')
                     print()
                     await asyncio.sleep(tf_dict.get(tf))
                     bands = Bands(tf, sym)
@@ -67,7 +67,7 @@ async def catch_signal(ts: tuple):
                     print('wma_high_min:', min(bands.wma_high_5, bands.wma_high_10))
                     print('поймал, re-entry')
                     print(time.asctime())
-                    await bot.send_message(chat_id=ADMIN, text=f'поймал re-entry ↓ {sym, tf_human}')
+                    await send_alert(text=f'поймал re-entry ↓ {sym, tf_human}')
                     print()
                     await asyncio.sleep(tf_dict.get(tf))
                     bands = Bands(tf, sym)
@@ -95,21 +95,9 @@ def get_arg_list() -> list[tuple]:
     return arg_list
 
 
-
-"""def watch_mt5():
-    async_list = []
-    for i in get_arg_list():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        a = asyncio.get_event_loop().run_until_complete(catch_signal(i))
-        async_list.append(a)
-    print(async_list)"""
-
-
-def watch_mt5():
-    threads = []
-    for i in get_arg_list():
-        t = threading.Thread(name=f'{i[0]} {str(get_tf(i[1]))}', target=catch_signal, args=(i, ))
-        threads.append(t)
-        t.start()
-    print(threads)
+async def send_alert(text):
+    for ad in ADMIN.split(', '):
+        try:
+            await bot.send_message(chat_id=ad, text=text)
+        except:
+            continue

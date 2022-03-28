@@ -3,7 +3,7 @@ import logging
 import tracemalloc
 
 from loader import dp, bot
-from util.bot_functions import watch_mt5
+
 
 import handlers
 
